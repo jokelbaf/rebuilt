@@ -1,0 +1,31 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Ruff
+.ruff_cache/
+
+# Node / Frontend
+node_modules/
+build/
+.react-router/
+
+# Backend
+.env
+*.db
+backend/static/
+
+# Data
+data/
+
+# AI
+.claude/
+
+# Other stuff
+references/
