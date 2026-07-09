@@ -1,0 +1,51 @@
+name: Format Frontend
+
+on:
+  push:
+    branches: [master]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: master
+          fetch-depth: 0
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11
+
+      - name: Install workspace dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run prettier
+        run: pnpm --filter frontend format
+
+      - name: Commit and push if needed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet; then
+            echo "No formatting changes."
+            exit 0
+          fi
+          git add -A
+          git commit -m "style(frontend): Apply prettier formatting"
+          for i in 1 2 3 4 5; do
+            git pull --rebase --autostash origin master && git push && exit 0
+            echo "Push failed (attempt $i), retrying..."
+            sleep 5
+          done
+          echo "Could not push after retries." >&2
+          exit 1

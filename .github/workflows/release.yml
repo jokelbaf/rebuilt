@@ -1,0 +1,102 @@
+name: Release
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - package.json
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Create release
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.meta.outputs.tag }}
+      created: ${{ steps.meta.outputs.created }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Resolve release metadata
+        id: meta
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="$(jq -r '.version' package.json)"
+          tag="v${version}"
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "created=false" >> "$GITHUB_OUTPUT"
+            echo "Release ${tag} already exists (no version bump)."
+          else
+            echo "created=true" >> "$GITHUB_OUTPUT"
+            echo "Release ${tag} is new."
+          fi
+
+      - name: Create release from version bump
+        uses: jokelbaf/pnpm-release@master
+        with:
+          package_path: package.json
+
+  build:
+    name: Build (${{ matrix.platform }})
+    needs: release
+    if: ${{ needs.release.outputs.created == 'true' || github.event_name == 'workflow_dispatch' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: linux
+          - os: windows-latest
+            platform: windows
+          - os: macos-latest
+            platform: macos
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Build app
+        uses: ./.github/actions/build-app
+
+      - name: Upload installers as run artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: rebuilt-${{ matrix.platform }}
+          if-no-files-found: error
+          path: |
+            shell/target/release/bundle/deb/*.deb
+            shell/target/release/bundle/rpm/*.rpm
+            shell/target/release/bundle/appimage/*.AppImage
+            shell/target/release/bundle/nsis/*.exe
+            shell/target/release/bundle/msi/*.msi
+            shell/target/release/bundle/dmg/*.dmg
+
+  publish:
+    name: Attach installers to release
+    needs: [release, build]
+    if: ${{ needs.release.outputs.created == 'true' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v8
+        with:
+          path: artifacts
+
+      - name: Attach installers to the release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ needs.release.outputs.tag }}
+          files: artifacts/**/*
+          fail_on_unmatched_files: true

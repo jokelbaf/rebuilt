@@ -1,0 +1,54 @@
+name: Lint Frontend
+
+on:
+  push:
+    branches: [master]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: master
+          fetch-depth: 0
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11
+
+      - name: Install workspace dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate route types
+        run: pnpm --filter frontend exec react-router typegen
+
+      - name: Run eslint (auto-fix)
+        run: pnpm --filter frontend lint:fix
+
+      - name: Commit and push if needed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet; then
+            echo "No lint fixes to apply."
+            exit 0
+          fi
+          git add -A
+          git commit -m "fix(frontend): Apply eslint auto-fixes"
+          for i in 1 2 3 4 5; do
+            git pull --rebase --autostash origin master && git push && exit 0
+            echo "Push failed (attempt $i), retrying..."
+            sleep 5
+          done
+          echo "Could not push after retries." >&2
+          exit 1

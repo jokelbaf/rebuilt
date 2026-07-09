@@ -1,0 +1,50 @@
+name: Lint Backend
+
+on:
+  push:
+    branches: [master]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: master
+          fetch-depth: 0
+
+      - name: Set up uv (Python 3.14)
+        uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.14"
+          enable-cache: true
+
+      - name: Run ruff check (auto-fix)
+        working-directory: backend
+        run: uv run ruff check --fix --output-format=github .
+
+      - name: Commit and push if needed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet; then
+            echo "No lint fixes to apply."
+            exit 0
+          fi
+          git add -A
+          git commit -m "fix(backend): Apply ruff auto-fixes"
+          for i in 1 2 3 4 5; do
+            git pull --rebase --autostash origin master && git push && exit 0
+            echo "Push failed (attempt $i), retrying..."
+            sleep 5
+          done
+          echo "Could not push after retries." >&2
+          exit 1
