@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Default capability for the main window. The backend sidecar is launched from Rust, so no shell IPC permissions are needed.",
+  "windows": ["main"],
+  "permissions": ["core:default"]
+}

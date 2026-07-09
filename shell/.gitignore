@@ -1,0 +1,8 @@
+# Rust build output
+/target/
+
+# Tauri codegen output
+/gen/
+
+# Compiled backend sidecars (produced by ../backend/build.py --sidecar)
+/binaries/

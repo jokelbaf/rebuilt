@@ -1,0 +1,17 @@
+[package]
+name = "rebuilt"
+version = "0.1.0"
+description = "ReBuilt - AI resume builder"
+authors = ["Nekolab"]
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-shell = "2"
+
+[features]
+# Used by production builds and when no dev server is specified. Do not remove.
+custom-protocol = ["tauri/custom-protocol"]

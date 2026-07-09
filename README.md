@@ -12,7 +12,12 @@ AI-powered resume builder. Describe a position and let AI tailor your resume or 
 ```
 backend/    FastAPI app (app/app.py entry, SQLModel models, /api routes)
 frontend/   React Router SPA (app/ routes & components, shadcn ui)
+shell/      Tauri v2 desktop shell (Rust): launches the sidecar, opens the window
 ```
+
+The repo root is a pnpm workspace (`pnpm-workspace.yaml`) whose only JS package is
+`frontend/`; the root `package.json` holds the Tauri CLI and the orchestration scripts
+(`pnpm dev` / `pnpm build`). `backend/` is a separate `uv` project.
 
 Backend modules:
 
@@ -61,7 +66,7 @@ pnpm install
 pnpm dev
 ```
 
-## Production
+## Production (from source)
 
 The frontend builds to a static SPA that the backend serves directly.
 
@@ -71,7 +76,55 @@ cp -r build/client/* ../backend/static/
 cd backend && PRODUCTION=yes uv run python app/app.py
 ```
 
-In production (`PRODUCTION=yes`) the backend serves the SPA from `static/` via
-`app.frontend()` (with client-side-routing fallback) and disables API docs. When the
-app is later compiled with Nuitka, the static directory is resolved next to the
-executable, so the same wiring works for the bundled desktop build.
+In production the backend serves the SPA from `static/` via `app.frontend()` (with
+client-side-routing fallback). Production mode is enabled by
+`PRODUCTION=yes` **or automatically whenever the app is compiled**, so the packaged binary needs no environment variables.
+
+## Packaging (desktop app)
+
+The desktop build has two layers: the backend (and the bundled SPA) is compiled into
+a single-file executable with Nuitka, which is then shipped as a Tauri v2 sidecar.
+
+```
+backend/build.py     Nuitka build: pnpm build -> stage static/ -> onefile -> sidecar
+shell/               Tauri v2 shell (Rust): launches the sidecar, opens the window
+```
+
+**Prerequisites:** the backend toolchain (`uv`), the frontend toolchain (`pnpm`), a
+[Rust toolchain](https://www.rust-lang.org/tools/install), and the
+[Tauri Linux system dependencies](https://v2.tauri.app/start/prerequisites/)
+(`webkit2gtk-4.1`, `libsoup-3.0`, …). Nuitka needs a C compiler; a working `patchelf`
+is provided as a backend dev dependency (the system `patchelf 0.18.0` is rejected by
+Nuitka, so `build.py` puts the venv's copy ahead on `PATH`).
+
+Everything runs from the repo root; no `cd` needed.
+
+```bash
+pnpm install          # once - installs the workspace (frontend) + the Tauri CLI
+pnpm build            # backend sidecar (frontend + Nuitka) -> tauri build
+```
+
+`pnpm build` runs `pnpm backend` then `tauri build`:
+
+- **`pnpm backend`** (`uv run --project backend python backend/build.py --sidecar`)
+  builds the frontend, stages it into `backend/static/`, compiles `app/app.py` into
+  `backend/dist/ReBuilt` (onefile, with `static/` and the `langdetect` data bundled),
+  and copies it into `shell/binaries/rebuilt-server-<target-triple>`. Pass
+  `--skip-frontend` to reuse an already-staged `static/`, or omit `--sidecar` to just
+  produce the binary.
+- **`tauri build`** bundles the shell -> `shell/target/release/bundle/{deb,rpm,appimage}/`.
+
+Use `pnpm dev` (= `tauri dev`) to run the shell during development - build the sidecar
+once with `pnpm backend` first.
+
+**How it fits together:** at launch the Rust shell picks a free localhost port, spawns
+the backend sidecar with that `PORT` (inheriting the environment so the `claude` CLI
+stays reachable), shows a splash screen, waits for `/api/health`, then points the
+window at `http://127.0.0.1:<port>`. The backend serves both the API and the SPA, so
+the frontend's relative `/api` calls work unchanged. On exit the shell terminates the
+sidecar process tree. Application data (database, exports, clones) lives in the
+platform user-data directory - see [Data location](#data-location).
+
+## License
+
+The project is licensed under the GNU General Public License v3.0. See [LICENSE](LICENSE) for details.

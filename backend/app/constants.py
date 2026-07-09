@@ -2,8 +2,11 @@ import os
 
 from modules import paths
 
-IS_PROD = os.getenv("PRODUCTION", "no").lower() in {"yes", "true", "1"}
-"""Whether the application is running in production mode."""
+IS_COMPILED = "__compiled__" in globals()
+"""Whether the application was compiled into a standalone binary with Nuitka."""
+
+IS_PROD = IS_COMPILED or os.getenv("PRODUCTION", "no").lower() in {"yes", "true", "1"}
+"""Whether the application is running in production mode (always true when compiled)."""
 
 IS_DEV = not IS_PROD
 """Whether the application is running in development mode."""

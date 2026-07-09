@@ -1,0 +1,16 @@
+{
+  "name": "rebuilt",
+  "private": true,
+  "version": "0.1.0",
+  "description": "ReBuilt - AI resume builder (workspace root)",
+  "scripts": {
+    "backend": "uv run --project backend python backend/build.py --sidecar",
+    "frontend": "pnpm --filter frontend build",
+    "tauri": "tauri",
+    "dev": "tauri dev",
+    "build": "pnpm backend && tauri build"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2"
+  }
+}

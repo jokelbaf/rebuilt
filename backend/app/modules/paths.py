@@ -54,9 +54,9 @@ def get_chats_dir() -> pathlib.Path:
 
 
 def get_static_dir() -> pathlib.Path:
-    """Resolve the bundled frontend directory, next to the executable when compiled."""
+    """Resolve the bundled frontend directory, alongside the compiled modules when compiled."""
     if "__compiled__" in globals():
-        base = pathlib.Path(__compiled__.containing_dir)  # type: ignore[name-defined]  # noqa: F821
+        base = pathlib.Path(__file__).resolve().parents[1]
     else:
         base = pathlib.Path(__file__).resolve().parents[2]
     return base / "static"

@@ -1,6 +1,10 @@
 {
     "files.exclude": {
         "backend/": true,
-        "frontend/": true
+        "frontend/": true,
+        "shell/": true,
+        // Cache and build artifacts
+        "node_modules/": true,
+        ".ruff_cache/": true,
     }
 }

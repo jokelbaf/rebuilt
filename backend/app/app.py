@@ -110,8 +110,10 @@ elif IS_PROD:
 
 if __name__ == "__main__":
     uvicorn.run(
-        "app:app",
-        host=os.getenv("HOST", "0.0.0.0"),
+        # Reload needs an import string; when compiled the main module is `__main__`,
+        # so pass the app object directly to avoid re-importing/re-running the module.
+        "app:app" if IS_DEV else app,
+        host=os.getenv("HOST", "127.0.0.1"),
         port=int(os.getenv("PORT", "8000")),
         reload=IS_DEV,
         log_config=None,
