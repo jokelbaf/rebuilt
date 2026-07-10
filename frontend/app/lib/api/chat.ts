@@ -25,7 +25,8 @@ const chatApi = {
 	create: (input: CreateChatInput) => apiClient.post<Chat>("/chats", input),
 	update: (id: string, input: ChatUpdateInput) => apiClient.patch<Chat>(`/chats/${id}`, input),
 	remove: (id: string) => apiClient.delete<void>(`/chats/${id}`),
-	models: () => apiClient.get<AiModelCatalog>("/chats/models"),
+	models: (provider?: string) =>
+		apiClient.get<AiModelCatalog>("/chats/models", { params: { provider } }),
 };
 
 export function useChats(search: string) {
@@ -74,10 +75,10 @@ export function useDeleteChat() {
 	});
 }
 
-export function useAiModelCatalog() {
+export function useAiModelCatalog(provider?: string) {
 	return useQuery({
-		queryKey: queryKeys.chats.models,
-		queryFn: chatApi.models,
+		queryKey: queryKeys.chats.models(provider),
+		queryFn: () => chatApi.models(provider),
 		staleTime: Infinity,
 	});
 }

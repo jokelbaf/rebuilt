@@ -9,6 +9,9 @@ class AiProvider(abc.ABC):
     """Unified interface for an AI backend used to generate and analyze content."""
 
     name: str
+    label: str
+    description: str
+    install_hint: str
 
     @abc.abstractmethod
     async def complete(
@@ -48,6 +51,23 @@ class AiProvider(abc.ABC):
     def models(self) -> list[AiModelInfo]:
         """Return the models this provider offers for chatting."""
 
-    def efforts(self) -> list[str]:
-        """Return the effort levels this provider supports, if any."""
-        return []
+    def efforts(self, model: str | None = None) -> list[str]:
+        """Return the effort levels supported by a model, if any."""
+        if model:
+            info = next((item for item in self.models() if item.id == model), None)
+            return list(info.efforts) if info else []
+        return list(dict.fromkeys(effort for item in self.models() for effort in item.efforts))
+
+    def default_model(self) -> str | None:
+        """Return the provider's default model id, if one is available."""
+        models = self.models()
+        default = next((item for item in models if item.default), None)
+        return default.id if default else (models[0].id if models else None)
+
+    def fast_model(self) -> str | None:
+        """Return the provider model preferred for lightweight tasks."""
+        return self.default_model()
+
+    def available(self) -> bool:
+        """Return whether the provider's local runtime is available."""
+        return True

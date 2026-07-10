@@ -27,6 +27,7 @@ function effortLabel(effort: string): string {
 }
 
 interface ModelSelectProps {
+	provider?: string;
 	model: string;
 	effort: string | null;
 	onModelChange: (model: string) => void;
@@ -35,17 +36,18 @@ interface ModelSelectProps {
 }
 
 export function ModelSelect({
+	provider,
 	model,
 	effort,
 	onModelChange,
 	onEffortChange,
 	disabled,
 }: ModelSelectProps) {
-	const { data } = useAiModelCatalog();
+	const { data } = useAiModelCatalog(provider);
 	const models = data?.models ?? [];
-	const efforts = data?.efforts ?? [];
 
 	const active = models.find((entry) => entry.id === model);
+	const efforts = active?.efforts ?? data?.efforts ?? [];
 	const triggerLabel = active?.label ?? model;
 
 	return (

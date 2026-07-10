@@ -6,7 +6,6 @@ import shutil
 from collections.abc import AsyncIterator
 from typing import Any, cast
 
-from constants import DEFAULT_MODEL
 from errors import UpstreamError
 from loguru import logger
 
@@ -20,17 +19,37 @@ _TOOL_SUMMARY_LIMIT = 120
 
 _EFFORT_LEVELS = ["low", "medium", "high", "xhigh", "max"]
 _BUILTIN_MODELS = [
-    AiModelInfo(id="haiku", label="Haiku 4.5", description="Fastest for everyday tasks"),
-    AiModelInfo(id="sonnet", label="Sonnet 5", description="Balanced intelligence and speed"),
-    AiModelInfo(id="opus", label="Opus 4.8", description="Most capable for complex work"),
+    AiModelInfo(
+        id="haiku",
+        label="Haiku 4.5",
+        description="Fastest for everyday tasks",
+        efforts=tuple(_EFFORT_LEVELS),
+    ),
+    AiModelInfo(
+        id="sonnet",
+        label="Sonnet 5",
+        description="Balanced intelligence and speed",
+        efforts=tuple(_EFFORT_LEVELS),
+    ),
+    AiModelInfo(
+        id="opus",
+        label="Opus 4.8",
+        description="Most capable for complex work",
+        efforts=tuple(_EFFORT_LEVELS),
+    ),
 ]
 _CLI_CONFIG_PATH = pathlib.Path.home() / ".claude.json"
+_DEFAULT_MODEL = "sonnet"
+_FAST_MODEL = "haiku"
 
 
 class ClaudeCodeProvider(AiProvider):
     """AI provider backed by the local ``claude`` CLI running in print mode."""
 
     name = "claude-code"
+    label = "Claude Code"
+    description = "Anthropic's local Claude Code CLI."
+    install_hint = "Install Claude Code and sign in with the claude CLI."
 
     def __init__(self, executable: str = "claude") -> None:
         self._executable = shutil.which(executable) or executable
@@ -51,7 +70,7 @@ class ClaudeCodeProvider(AiProvider):
             "--output-format",
             "json",
             "--model",
-            model or DEFAULT_MODEL,
+            model or _DEFAULT_MODEL,
         ]
         if system:
             args += ["--append-system-prompt", system]
@@ -103,7 +122,7 @@ class ClaudeCodeProvider(AiProvider):
             "stream-json",
             "--include-partial-messages",
             "--model",
-            model or DEFAULT_MODEL,
+            model or _DEFAULT_MODEL,
         ]
         if effort:
             args += ["--effort", effort]
@@ -190,15 +209,19 @@ class ClaudeCodeProvider(AiProvider):
     def models(self) -> list[AiModelInfo]:
         """Return the builtin claude models plus any extras cached by the CLI."""
         models = [
-            dataclasses.replace(info, default=info.id == DEFAULT_MODEL) for info in _BUILTIN_MODELS
+            dataclasses.replace(info, default=info.id == _DEFAULT_MODEL) for info in _BUILTIN_MODELS
         ]
         known = {info.id for info in models}
         models += [info for info in self._extra_models() if info.id not in known]
         return models
 
-    def efforts(self) -> list[str]:
-        """Return the effort levels supported by the claude CLI."""
-        return list(_EFFORT_LEVELS)
+    def fast_model(self) -> str:
+        """Return the Claude model preferred for lightweight tasks."""
+        return _FAST_MODEL
+
+    def available(self) -> bool:
+        """Return whether the Claude CLI is available on PATH."""
+        return shutil.which(self._executable) is not None
 
     def _extra_models(self) -> list[AiModelInfo]:
         """Read additional models from the claude CLI config cache, if present."""
@@ -230,6 +253,7 @@ class ClaudeCodeProvider(AiProvider):
                         id=value,
                         label=label,
                         description=description if isinstance(description, str) else "",
+                        efforts=tuple(_EFFORT_LEVELS),
                     )
                 )
         except OSError, json.JSONDecodeError:

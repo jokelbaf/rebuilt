@@ -43,3 +43,4 @@ class AiModelInfo:
     label: str
     description: str = ""
     default: bool = False
+    efforts: tuple[str, ...] = ()

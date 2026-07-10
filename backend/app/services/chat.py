@@ -9,7 +9,7 @@ from typing import Any
 from ai import get_provider, prompts
 from ai.events import ChatDelta, ChatSessionStart, ChatToolUse
 from ai.mcp import get_mcp_url
-from constants import CHATS_DIR, FAST_MODEL
+from constants import CHATS_DIR
 from crud import chats as chats_crud
 from crud import files as files_crud
 from crud import projects as projects_crud
@@ -45,10 +45,11 @@ _FALLBACK_TITLE_LIMIT = 60
 
 async def create_chat(payload: ChatCreate) -> Chat:
     """Create a new chat bound to the active provider and a validated model."""
-    ensure_model(payload.model)
-    ensure_effort(payload.effort)
+    provider = get_provider()
+    ensure_model(payload.model, provider.name)
+    ensure_effort(payload.effort, payload.model, provider.name)
     return await chats_crud.create(
-        Chat(provider=get_provider().name, model=payload.model, effort=payload.effort)
+        Chat(provider=provider.name, model=payload.model, effort=payload.effort)
     )
 
 
@@ -77,15 +78,15 @@ async def delete_chat(chat_id: uuid.UUID) -> None:
     shutil.rmtree(CHATS_DIR / str(chat_id), ignore_errors=True)
 
 
-def ensure_model(model: str) -> None:
-    """Validate that the active provider offers the given model."""
-    if model not in {info.id for info in get_provider().models()}:
+def ensure_model(model: str, provider_name: str | None = None) -> None:
+    """Validate that a provider offers the given model."""
+    if model not in {info.id for info in get_provider(provider_name).models()}:
         raise BadRequestError("Unknown AI model.")
 
 
-def ensure_effort(effort: str | None) -> None:
-    """Validate that the active provider supports the given effort level."""
-    if effort and effort not in get_provider().efforts():
+def ensure_effort(effort: str | None, model: str, provider_name: str | None = None) -> None:
+    """Validate that a provider model supports the given effort level."""
+    if effort and effort not in get_provider(provider_name).efforts(model):
         raise BadRequestError("Unknown AI effort level.")
 
 
@@ -156,7 +157,10 @@ async def stream_message(
             )
         )
 
-        title_task = asyncio.create_task(_generate_title(content)) if is_first else None
+        provider = get_provider(chat.provider)
+        title_task = (
+            asyncio.create_task(_generate_title(content, provider.name)) if is_first else None
+        )
         system = prompts.build_chat_system_prompt(await _build_inventory())
         uploads_dir = _uploads_dir(chat.id)
         uploads_dir.mkdir(parents=True, exist_ok=True)
@@ -168,7 +172,7 @@ async def stream_message(
         finished = False
 
         try:
-            async for event in get_provider().chat_stream(
+            async for event in provider.chat_stream(
                 prompt,
                 system=system,
                 model=model,
@@ -315,13 +319,14 @@ def _build_prompt(
     return "\n\n".join(part for part in parts if part)
 
 
-async def _generate_title(message: str) -> str:
+async def _generate_title(message: str, provider_name: str) -> str:
     """Generate a short chat title from the first user message."""
+    provider = get_provider(provider_name)
     try:
-        raw = await get_provider().complete(
+        raw = await provider.complete(
             prompts.build_chat_title_prompt(message),
             system=prompts.CHAT_TITLE_SYSTEM,
-            model=FAST_MODEL,
+            model=provider.fast_model(),
         )
     except APIError as exc:
         logger.warning("Chat title generation failed: {}", exc.message)

@@ -12,6 +12,8 @@ import { useComposer, type ComposerSubmission } from "./use-composer";
 
 interface ChatComposerProps {
 	isStreaming: boolean;
+	disabled?: boolean;
+	provider?: string;
 	model: string;
 	effort: string | null;
 	onModelChange: (model: string) => void;
@@ -22,6 +24,8 @@ interface ChatComposerProps {
 
 export function ChatComposer({
 	isStreaming,
+	disabled,
+	provider,
 	model,
 	effort,
 	onModelChange,
@@ -53,7 +57,7 @@ export function ChatComposer({
 		submit,
 	} = useComposer({ isStreaming, onSend });
 
-	const canSend = !isStreaming && (content.trim().length > 0 || files.length > 0);
+	const canSend = !disabled && !isStreaming && (content.trim().length > 0 || files.length > 0);
 
 	return (
 		<div className="shrink-0 border-t">
@@ -105,6 +109,7 @@ export function ChatComposer({
 						onPaste={handlePaste}
 						placeholder="Message the assistant... Type / to attach vacancies, projects, profile or experience."
 						rows={1}
+						disabled={disabled}
 						className="max-h-52 min-h-11 resize-none border-0 shadow-none focus-visible:ring-0 dark:bg-transparent"
 					/>
 
@@ -125,17 +130,19 @@ export function ChatComposer({
 								variant="ghost"
 								size="icon"
 								className="text-muted-foreground size-8"
+								disabled={disabled}
 								onClick={() => fileInputRef.current?.click()}
 							>
 								<Paperclip className="size-4" />
 								<span className="sr-only">Attach files</span>
 							</Button>
 							<ModelSelect
+								provider={provider}
 								model={model}
 								effort={effort}
 								onModelChange={onModelChange}
 								onEffortChange={onEffortChange}
-								disabled={isStreaming}
+								disabled={disabled || isStreaming}
 							/>
 						</div>
 						<div className="flex items-center gap-2">

@@ -1,7 +1,6 @@
 from typing import TypedDict
 
 from ai import get_provider, prompts
-from constants import FAST_MODEL
 from errors import APIError
 from loguru import logger
 
@@ -24,11 +23,12 @@ def _empty() -> VacancySignals:
 
 async def analyze_vacancy(title: str, description: str) -> VacancySignals:
     """Extract matching signals from a vacancy, returning empty signals on failure."""
+    provider = get_provider()
     try:
-        output = await get_provider().complete(
+        output = await provider.complete(
             prompts.build_vacancy_analysis_prompt(title, description),
             system=prompts.VACANCY_ANALYSIS_SYSTEM,
-            model=FAST_MODEL,
+            model=provider.fast_model(),
         )
         data = parse_json_object(output)
     except APIError as exc:

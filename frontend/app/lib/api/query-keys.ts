@@ -39,6 +39,10 @@ export const queryKeys = {
 		all: ["chats"] as const,
 		list: (search: string) => ["chats", "list", search] as const,
 		detail: (id: string) => ["chats", id] as const,
-		models: ["chats", "models"] as const,
+		modelCatalogs: ["chats", "models"] as const,
+		models: (provider?: string) => ["chats", "models", provider ?? "active"] as const,
+	},
+	settings: {
+		ai: ["settings", "ai"] as const,
 	},
 } as const;

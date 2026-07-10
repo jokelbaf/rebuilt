@@ -48,9 +48,11 @@ export interface AiModel {
 	label: string;
 	description: string;
 	default: boolean;
+	efforts: string[];
 }
 
 export interface AiModelCatalog {
+	provider: string;
 	models: AiModel[];
 	efforts: string[];
 }

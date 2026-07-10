@@ -24,9 +24,11 @@ from routes import (
     library,
     projects,
     resume,
+    settings,
     templates,
     vacancies,
 )
+from services import settings as settings_service
 
 for name in list(logging.root.manager.loggerDict.keys()):
     logging.getLogger(name).handlers.clear()
@@ -70,6 +72,7 @@ for logger_name in loggers:
 async def lifespan(app: FastAPI):
     """Lifespan context manager."""
     await db.init(app)
+    await settings_service.initialize_ai_provider()
 
     async with ai_mcp.run_session_manager():
         yield
@@ -96,6 +99,7 @@ app.include_router(cover_letter.router)
 app.include_router(library.router)
 app.include_router(git.router)
 app.include_router(chat.router)
+app.include_router(settings.router)
 app.include_router(backup.router)
 for files_router in files.routers:
     app.include_router(files_router)

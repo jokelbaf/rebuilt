@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse, Response
 from responses import ok
 from schemas.backup import BackupSummary
 from services import backup as backup_service
+from services import settings as settings_service
 
 router = APIRouter(prefix="/api", tags=["Backup"])
 
@@ -29,6 +30,7 @@ async def import_backup(file: UploadFile = File()) -> JSONResponse:
     if not data:
         raise BadRequestError("The uploaded backup file is empty.")
     summary: BackupSummary = await backup_service.restore_backup(data)
+    await settings_service.initialize_ai_provider()
     return ok(summary, message="Backup restored.")
 
 
@@ -36,4 +38,5 @@ async def import_backup(file: UploadFile = File()) -> JSONResponse:
 async def erase_all_data() -> JSONResponse:
     """Permanently delete all application data."""
     await backup_service.erase_all_data()
+    await settings_service.initialize_ai_provider()
     return ok(message="All data erased.")

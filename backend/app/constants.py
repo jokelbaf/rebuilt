@@ -28,9 +28,3 @@ CHATS_DIR = paths.get_chats_dir()
 
 STATIC_DIR = paths.get_static_dir()
 """Directory containing the bundled frontend build."""
-
-DEFAULT_MODEL = "sonnet"
-"""Default AI model used for generation and analysis."""
-
-FAST_MODEL = "haiku"
-"""Lightweight AI model used for quick extraction tasks."""

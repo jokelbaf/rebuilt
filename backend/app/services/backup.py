@@ -13,6 +13,7 @@ from constants import DATA_DIR
 from errors import BadRequestError
 from loguru import logger
 from models import (
+    AppSetting,
     Chat,
     ChatMessage,
     CoverLetter,
@@ -40,6 +41,7 @@ _SECTION_DATABASE = 2
 _SECTION_FILE = 3
 
 _TABLES: dict[str, type[SQLModel]] = {
+    "app_setting": AppSetting,
     "vacancy": Vacancy,
     "project": Project,
     "template": Template,

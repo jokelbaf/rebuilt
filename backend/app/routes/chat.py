@@ -3,6 +3,7 @@ from collections.abc import AsyncIterator
 from typing import Annotated
 
 from ai import get_provider
+from ai.provider import has_provider
 from crud import chats as chats_crud
 from errors import BadRequestError, NotFoundError
 from fastapi import APIRouter, File, Form, Query, UploadFile
@@ -39,15 +40,24 @@ async def create_chat(payload: ChatCreate) -> JSONResponse:
 
 
 @router.get("/models")
-async def list_models() -> JSONResponse:
-    """List the models and effort levels offered by the active AI provider."""
-    provider = get_provider()
+async def list_models(provider: Annotated[str | None, Query()] = None) -> JSONResponse:
+    """List the models and effort levels offered by an AI provider."""
+    if provider and not has_provider(provider):
+        raise BadRequestError("Unknown AI provider.")
+    active_provider = get_provider(provider)
     catalog = AiModelCatalog(
+        provider=active_provider.name,
         models=[
-            AiModelPublic(id=m.id, label=m.label, description=m.description, default=m.default)
-            for m in provider.models()
+            AiModelPublic(
+                id=m.id,
+                label=m.label,
+                description=m.description,
+                default=m.default,
+                efforts=list(m.efforts),
+            )
+            for m in active_provider.models()
         ],
-        efforts=provider.efforts(),
+        efforts=active_provider.efforts(),
     )
     return ok(catalog)
 
@@ -95,8 +105,8 @@ async def send_message(
         raise NotFoundError("Chat not found.")
     if not content.strip() and not files:
         raise BadRequestError("Message content is required.")
-    chat_service.ensure_model(model)
-    chat_service.ensure_effort(effort or None)
+    chat_service.ensure_model(model, chat.provider)
+    chat_service.ensure_effort(effort or None, model, chat.provider)
     chat_service.ensure_idle(chat_id)
     refs = chat_service.parse_context(context)
     attachments = await chat_service.save_uploads(chat_id, files or [])

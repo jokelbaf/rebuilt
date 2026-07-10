@@ -44,9 +44,10 @@ single data directory, resolved in this order:
    `~/.local/share/ReBuilt` (Linux), `~/Library/Application Support/ReBuilt` (macOS),
    `%LOCALAPPDATA%\ReBuilt` (Windows).
 
-The AI backend shells out to the local `claude` CLI in print mode (`claude -p`);
-`AiProvider` is a unified interface so other providers (e.g. an OpenAI API backend)
-can be added later. The default model is `sonnet`.
+The AI backend supports both the local `claude` and `codex` CLIs through a unified
+`AiProvider` interface. Select the active provider in Settings > AI Backend; the
+choice is persisted in the application database. Each CLI manages its own sign-in,
+and existing chats remain bound to the provider they were created with.
 
 ## Development
 
@@ -122,8 +123,9 @@ the backend sidecar with that `PORT` (inheriting the environment so the `claude`
 stays reachable), shows a splash screen, waits for `/api/health`, then points the
 window at `http://127.0.0.1:<port>`. The backend serves both the API and the SPA, so
 the frontend's relative `/api` calls work unchanged. On exit the shell terminates the
-sidecar process tree. Application data (database, exports, clones) lives in the
-platform user-data directory - see [Data location](#data-location).
+sidecar process tree. The inherited environment keeps both supported AI CLIs
+reachable. Application data (database, exports, clones) lives in the platform
+user-data directory - see [Data location](#data-location).
 
 ## License
 

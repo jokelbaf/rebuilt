@@ -23,7 +23,7 @@ interface ComposerChoice {
 export default function ChatPage() {
 	const { id } = useParams<{ id: string }>();
 	const session = useChatSession(id);
-	const { data: catalog } = useAiModelCatalog();
+	const { data: catalog } = useAiModelCatalog(session.chat?.provider);
 	const [choice, setChoice] = useState<ComposerChoice>({
 		chatId: id,
 		model: null,
@@ -34,9 +34,10 @@ export default function ChatPage() {
 	const models = catalog?.models ?? [];
 	const modelOverride = choice.chatId === id ? choice.model : null;
 	const effortOverride = choice.chatId === id ? choice.effort : undefined;
-	const defaultModel = models.find((m) => m.default)?.id ?? models[0]?.id ?? "sonnet";
+	const defaultModel = models.find((m) => m.default)?.id ?? models[0]?.id ?? "";
 	const model = modelOverride ?? session.chat?.model ?? defaultModel;
 	const effort = effortOverride !== undefined ? effortOverride : (session.chat?.effort ?? null);
+	const modelAvailable = models.some((item) => item.id === model);
 
 	const hasConversation =
 		session.messages.length > 0 || session.turn.userMessage !== null || session.isStreaming;
@@ -48,6 +49,15 @@ export default function ChatPage() {
 
 	function handleSuggestion(prompt: string) {
 		void session.send({ content: prompt, model, effort, context: [], files: [] });
+	}
+
+	function handleModelChange(nextModel: string) {
+		const supported = models.find((item) => item.id === nextModel)?.efforts ?? [];
+		setChoice({
+			chatId: id,
+			model: nextModel,
+			effort: effort && !supported.includes(effort) ? null : effort,
+		});
 	}
 
 	return (
@@ -109,15 +119,20 @@ export default function ChatPage() {
 						/>
 					) : (
 						<div className="min-h-0 flex-1">
-							<ChatWelcome onSuggestion={handleSuggestion} />
+							<ChatWelcome
+								onSuggestion={handleSuggestion}
+								disabled={!modelAvailable}
+							/>
 						</div>
 					)}
 
 					<ChatComposer
 						isStreaming={session.isStreaming}
+						disabled={!modelAvailable}
+						provider={session.chat?.provider}
 						model={model}
 						effort={effort}
-						onModelChange={(next) => setChoice({ chatId: id, model: next, effort })}
+						onModelChange={handleModelChange}
 						onEffortChange={(next) => setChoice({ chatId: id, model, effort: next })}
 						onSend={handleSend}
 						onStop={session.stop}

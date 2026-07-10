@@ -11,7 +11,13 @@ const suggestions = [
 	"Help me prepare for an interview",
 ];
 
-export function ChatWelcome({ onSuggestion }: { onSuggestion: (prompt: string) => void }) {
+export function ChatWelcome({
+	onSuggestion,
+	disabled,
+}: {
+	onSuggestion: (prompt: string) => void;
+	disabled?: boolean;
+}) {
 	return (
 		<motion.div
 			variants={fadeInUp}
@@ -38,6 +44,7 @@ export function ChatWelcome({ onSuggestion }: { onSuggestion: (prompt: string) =
 						size="sm"
 						className="h-auto py-1.5 text-xs font-normal"
 						onClick={() => onSuggestion(suggestion)}
+						disabled={disabled}
 					>
 						{suggestion}
 					</Button>

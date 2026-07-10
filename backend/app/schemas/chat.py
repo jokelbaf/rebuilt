@@ -74,11 +74,13 @@ class AiModelPublic(CamelModel):
     label: str
     description: str = ""
     default: bool = False
+    efforts: list[str] = []
 
 
 class AiModelCatalog(CamelModel):
     """The models and effort levels offered by the active AI provider."""
 
+    provider: str
     models: list[AiModelPublic]
     efforts: list[str]
 

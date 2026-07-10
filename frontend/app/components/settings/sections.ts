@@ -11,10 +11,10 @@ export interface SettingsSection {
 }
 
 export const settingsSections: SettingsSection[] = [
-	{ id: "ai-backend", label: "AI Backend", icon: Bot, disabled: true, badge: "Soon" },
+	{ id: "ai-backend", label: "AI Backend", icon: Bot },
 	{ id: "git-sources", label: "Git Sources", icon: GitBranch },
 	{ id: "backups", label: "Backups", icon: DatabaseBackup },
 	{ id: "danger", label: "Danger", icon: AlertTriangle },
 ];
 
-export const defaultSettingsSection: SettingsSectionId = "git-sources";
+export const defaultSettingsSection: SettingsSectionId = "ai-backend";
