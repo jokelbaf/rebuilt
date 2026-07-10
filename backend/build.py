@@ -18,7 +18,7 @@ SIDECAR_DIR = ROOT_DIR / "shell" / "binaries"
 
 APP_NAME = "ReBuilt"
 SIDECAR_NAME = "rebuilt-server"
-VERSION = "0.1.0"
+VERSION = "0.2.0"
 IS_WINDOWS = sys.platform == "win32"
 IS_MACOS = sys.platform == "darwin"
 
