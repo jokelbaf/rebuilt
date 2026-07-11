@@ -22,14 +22,15 @@ jobs:
           fetch-depth: 0
 
       - name: Set up uv (Python 3.14)
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990
         with:
           python-version: "3.14"
           enable-cache: true
+          cache-dependency-glob: backend/uv.lock
 
       - name: Run ruff format
         working-directory: backend
-        run: uv run ruff format .
+        run: uv run --frozen ruff format .
 
       - name: Commit and push if needed
         run: |
