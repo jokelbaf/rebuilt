@@ -1,6 +1,16 @@
 # rebuilt
 
-AI-powered resume builder. Describe a position and let AI tailor your resume or cover letter to match it.
+AI-powered job-search workspace. Discover and rank vacancies, then tailor resumes and cover
+letters to the roles you choose.
+
+## Features
+
+- Automatic authenticated vacancy discovery from robota.ua and Djinni.
+- AI fit scoring against profile, experience, projects, and saved search preferences.
+- Approval inbox with dismiss/restore history and transparent live activity events.
+- Scheduled searches, salary conversion, and optional Telegram alerts.
+- Targeted resume and cover-letter generation with editable HTML templates and PDF export.
+- Project import from Git repositories plus reusable profile and experience documents.
 
 ## Stack
 
@@ -26,12 +36,14 @@ app/models/      SQLModel tables (vacancy, template, markdown file, project, res
 app/schemas/     camelCase Pydantic request/response models
 app/crud/        async data-access, one module per resource
 app/services/    business logic (generation, export, repo import, context)
+app/services/discovery/ vacancy search runner, scoring, scheduler, currency, promotion
 app/ai/          AiProvider interface + Claude Code (claude -p) implementation + prompts
 app/parsing/     site-specific vacancy parsers (robota.ua, work.ua, djinni.co, linkedin.com)
-app/git/         git provider interface + GitHub implementation
+app/gitops/      git provider interface + GitHub implementation
 app/pdf/         WeasyPrint HTML -> PDF renderer
 app/routes/      FastAPI routers, one per resource
 app/responses/   { message, data } envelope helpers
+packages/jobboards/ standalone authenticated job-board clients and parser tests
 ```
 
 ## Data location

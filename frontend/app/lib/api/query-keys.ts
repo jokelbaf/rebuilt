@@ -1,6 +1,29 @@
 import type { FileCollection } from "./types/files";
+import type { DiscoveredVacancyFilters, DiscoveryVacancyStatus } from "./types/discovery";
 
 export const queryKeys = {
+	discovery: {
+		all: ["discovery"] as const,
+		settings: ["discovery", "settings"] as const,
+		exchangeRates: ["discovery", "exchange-rates"] as const,
+		accounts: ["discovery", "accounts"] as const,
+		queries: ["discovery", "queries"] as const,
+		vacancies: {
+			all: ["discovery", "vacancies"] as const,
+			lists: ["discovery", "vacancies", "list"] as const,
+			list: (filters: DiscoveredVacancyFilters) =>
+				["discovery", "vacancies", "list", filters] as const,
+			count: (status: DiscoveryVacancyStatus) =>
+				["discovery", "vacancies", "count", status] as const,
+			detail: (id: string) => ["discovery", "vacancies", id] as const,
+		},
+		runs: {
+			all: ["discovery", "runs"] as const,
+			list: (limit: number) => ["discovery", "runs", limit] as const,
+			detail: (id: string) => ["discovery", "runs", id] as const,
+			events: (id: string) => ["discovery", "runs", id, "events"] as const,
+		},
+	},
 	vacancies: {
 		all: ["vacancies"] as const,
 		list: (search: string) => ["vacancies", "list", search] as const,

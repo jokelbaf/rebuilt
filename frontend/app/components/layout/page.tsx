@@ -1,11 +1,27 @@
+import { motion } from "motion/react";
+
 import { Separator } from "~/components/ui/separator";
 import { SidebarTrigger } from "~/components/ui/sidebar";
+import { fadeInUp } from "~/lib/motion";
 import { cn } from "~/lib/utils";
 
 interface PageHeaderProps {
 	title: React.ReactNode;
 	description?: string;
 	actions?: React.ReactNode;
+}
+
+export function PageTransition({ children }: { children: React.ReactNode }) {
+	return (
+		<motion.div
+			variants={fadeInUp}
+			initial="hidden"
+			animate="visible"
+			className="flex min-h-0 flex-1 flex-col"
+		>
+			{children}
+		</motion.div>
+	);
 }
 
 export function PageHeader({ title, description, actions }: PageHeaderProps) {

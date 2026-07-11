@@ -8,8 +8,9 @@ wheels/
 # Virtual environments
 .venv
 
-# Ruff
+# Ruff / pytest
 .ruff_cache/
+.pytest_cache/
 
 # Node / Frontend
 node_modules/

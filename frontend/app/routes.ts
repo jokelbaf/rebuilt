@@ -9,6 +9,11 @@ export default [
 
 		route("chat/:id?", "routes/chat/index.tsx"),
 
+		route("discovery", "routes/discovery/index.tsx"),
+		route("discovery/vacancies/:id", "routes/discovery/vacancy.tsx"),
+		route("discovery/activity", "routes/discovery/activity.tsx"),
+		route("discovery/settings", "routes/discovery/settings.tsx"),
+
 		route("resumes", "routes/resumes/index.tsx"),
 		route("cover-letters", "routes/cover-letters/index.tsx"),
 

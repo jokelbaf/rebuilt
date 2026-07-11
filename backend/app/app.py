@@ -3,6 +3,7 @@ import dotenv
 
 dotenv.load_dotenv()
 
+import asyncio
 import contextlib
 import logging
 import os
@@ -18,6 +19,7 @@ from routes import (
     backup,
     chat,
     cover_letter,
+    discovery,
     files,
     git,
     health,
@@ -29,6 +31,9 @@ from routes import (
     vacancies,
 )
 from services import settings as settings_service
+from services.discovery import currency as discovery_currency
+from services.discovery import runner as discovery_runner
+from services.discovery import scheduler as discovery_scheduler
 
 for name in list(logging.root.manager.loggerDict.keys()):
     logging.getLogger(name).handlers.clear()
@@ -73,11 +78,22 @@ async def lifespan(app: FastAPI):
     """Lifespan context manager."""
     await db.init(app)
     await settings_service.initialize_ai_provider()
+    currency_task = asyncio.create_task(
+        discovery_currency.refresh_if_stale(), name="discovery-currency-refresh"
+    )
+    discovery_scheduler.start()
 
-    async with ai_mcp.run_session_manager():
-        yield
-
-    await db.shutdown()
+    try:
+        async with ai_mcp.run_session_manager():
+            yield
+    finally:
+        await discovery_scheduler.stop()
+        await discovery_runner.stop()
+        if not currency_task.done():
+            currency_task.cancel()
+        with contextlib.suppress(asyncio.CancelledError):
+            await currency_task
+        await db.shutdown()
 
 
 app = FastAPI(
@@ -96,6 +112,7 @@ app.include_router(templates.router)
 app.include_router(projects.router)
 app.include_router(resume.router)
 app.include_router(cover_letter.router)
+app.include_router(discovery.router)
 app.include_router(library.router)
 app.include_router(git.router)
 app.include_router(chat.router)

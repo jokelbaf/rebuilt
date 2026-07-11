@@ -1,7 +1,18 @@
 const DAY_MS = 86_400_000;
+const TIMEZONE_SUFFIX = /(Z|[+-]\d{2}:?\d{2})$/i;
+
+export function parseApiDate(iso: string): Date {
+	const normalized = TIMEZONE_SUFFIX.test(iso) ? iso : `${iso}Z`;
+	return new Date(normalized);
+}
+
+export function formatDateTime(iso: string): string {
+	const date = parseApiDate(iso);
+	return Number.isNaN(date.getTime()) ? "" : date.toLocaleString();
+}
 
 export function formatRelativeDate(iso: string): string {
-	const date = new Date(iso);
+	const date = parseApiDate(iso);
 	if (Number.isNaN(date.getTime())) return "";
 
 	const diff = Date.now() - date.getTime();

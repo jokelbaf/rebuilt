@@ -28,3 +28,6 @@ CHATS_DIR = paths.get_chats_dir()
 
 STATIC_DIR = paths.get_static_dir()
 """Directory containing the bundled frontend build."""
+
+SUPPORTED_CURRENCIES = ("USD", "EUR", "GBP", "UAH", "PLN")
+"""Currencies supported by discovery search and salary conversion."""

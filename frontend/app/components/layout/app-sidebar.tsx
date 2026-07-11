@@ -11,14 +11,20 @@ import {
 	SidebarGroupLabel,
 	SidebarHeader,
 	SidebarMenu,
+	SidebarMenuBadge,
 	SidebarMenuButton,
 	SidebarMenuItem,
 	SidebarRail,
+	useSidebar,
 } from "~/components/ui/sidebar";
+import { useDiscoveredVacancyCount } from "~/lib/api/discovery";
 import { isNavItemActive, navGroups } from "~/lib/navigation";
 
 export function AppSidebar({ onOpenSettings }: { onOpenSettings: () => void }) {
 	const { pathname } = useLocation();
+	const { isMobile, setOpenMobile } = useSidebar();
+	const { data: newVacancyCount } = useDiscoveredVacancyCount();
+	const closeMobileSidebar = () => isMobile && setOpenMobile(false);
 
 	return (
 		<Sidebar collapsible="icon">
@@ -26,7 +32,7 @@ export function AppSidebar({ onOpenSettings }: { onOpenSettings: () => void }) {
 				<SidebarMenu>
 					<SidebarMenuItem>
 						<SidebarMenuButton asChild size="lg" tooltip="ReBuilt">
-							<Link to="/resume">
+							<Link to="/resume" onClick={closeMobileSidebar}>
 								<img
 									src="/favicon.png"
 									alt="ReBuilt"
@@ -57,11 +63,17 @@ export function AppSidebar({ onOpenSettings }: { onOpenSettings: () => void }) {
 											isActive={isNavItemActive(pathname, item.url)}
 											tooltip={item.title}
 										>
-											<Link to={item.url}>
+											<Link to={item.url} onClick={closeMobileSidebar}>
 												<item.icon />
 												<span>{item.title}</span>
 											</Link>
 										</SidebarMenuButton>
+										{item.url === "/discovery" &&
+											(newVacancyCount?.count ?? 0) > 0 && (
+												<SidebarMenuBadge>
+													{newVacancyCount?.count}
+												</SidebarMenuBadge>
+											)}
 									</SidebarMenuItem>
 								))}
 							</SidebarMenu>
@@ -76,7 +88,13 @@ export function AppSidebar({ onOpenSettings }: { onOpenSettings: () => void }) {
 						<ThemeMenuButton />
 					</SidebarMenuItem>
 					<SidebarMenuItem>
-						<SidebarMenuButton onClick={onOpenSettings} tooltip="Settings">
+						<SidebarMenuButton
+							onClick={() => {
+								closeMobileSidebar();
+								onOpenSettings();
+							}}
+							tooltip="Settings"
+						>
 							<Settings />
 							<span>Settings</span>
 						</SidebarMenuButton>

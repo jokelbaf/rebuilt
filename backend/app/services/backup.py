@@ -17,10 +17,15 @@ from models import (
     Chat,
     ChatMessage,
     CoverLetter,
+    DiscoveredVacancy,
+    DiscoveryEvent,
+    DiscoveryRun,
     GitSource,
     MarkdownFile,
+    PlatformAccount,
     Project,
     Resume,
+    SearchQuery,
     Template,
     Vacancy,
 )
@@ -51,6 +56,11 @@ _TABLES: dict[str, type[SQLModel]] = {
     "git_source": GitSource,
     "chat": Chat,
     "chat_message": ChatMessage,
+    "platform_account": PlatformAccount,
+    "search_query": SearchQuery,
+    "discovery_run": DiscoveryRun,
+    "discovery_event": DiscoveryEvent,
+    "discovered_vacancy": DiscoveredVacancy,
 }
 _FILE_ROOTS = ("chats", "exports")
 _TEMP_ROOTS = ("clones",)
@@ -264,5 +274,10 @@ def _build_summary(rows: dict[str, list[SQLModel]], file_count: int) -> BackupSu
         git_sources=len(rows["git_source"]),
         chats=len(rows["chat"]),
         chat_messages=len(rows["chat_message"]),
+        platform_accounts=len(rows["platform_account"]),
+        search_queries=len(rows["search_query"]),
+        discovery_runs=len(rows["discovery_run"]),
+        discovery_events=len(rows["discovery_event"]),
+        discovered_vacancies=len(rows["discovered_vacancy"]),
         files=file_count,
     )

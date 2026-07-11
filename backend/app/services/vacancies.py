@@ -7,7 +7,7 @@ from schemas.vacancies import VacancyCreate, VacancyParse
 from .vacancy_analysis import VacancySignals, analyze_vacancy
 
 
-async def _persist(
+async def persist(
     title: str,
     description: str,
     language: str,
@@ -32,13 +32,13 @@ async def create_manual(payload: VacancyCreate) -> Vacancy:
     """Create a vacancy from manual input, enriched with AI-extracted signals."""
     language = detect_language(f"{payload.title}\n{payload.description}")
     signals = await analyze_vacancy(payload.title, payload.description)
-    return await _persist(payload.title, payload.description, language, signals)
+    return await persist(payload.title, payload.description, language, signals)
 
 
 async def create_from_url(payload: VacancyParse) -> Vacancy:
     """Parse a vacancy from a URL, enriched with AI-extracted signals."""
     parsed = await parse_vacancy(payload.url)
     signals = await analyze_vacancy(parsed.title, parsed.description)
-    return await _persist(
+    return await persist(
         parsed.title, parsed.description, parsed.language, signals, clean_url(payload.url)
     )

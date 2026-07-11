@@ -77,6 +77,7 @@ def build_binary() -> Path:
         f"--output-dir={OUTPUT_DIR}",
         f"--output-filename={output_name}",
         "--include-data-dir=static=static",
+        "--include-package=jobboards",
         "--include-package-data=langdetect",
         "--assume-yes-for-downloads",
         "--company-name=Nekolab",

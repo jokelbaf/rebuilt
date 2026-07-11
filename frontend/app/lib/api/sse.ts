@@ -27,12 +27,15 @@ export async function streamSse(path: string, options: StreamSseOptions): Promis
 		);
 	}
 
-	if (!response.ok) {
-		throw new ApiError(await readErrorMessage(response), response.status);
-	}
-	if (!response.body) {
-		throw new ApiError("The server returned an empty stream.", response.status);
-	}
+	await consumeSseResponse(response, onMessage);
+}
+
+export async function consumeSseResponse(
+	response: Response,
+	onMessage: (message: SseMessage) => void
+): Promise<void> {
+	if (!response.ok) throw new ApiError(await readErrorMessage(response), response.status);
+	if (!response.body) throw new ApiError("The server returned an empty stream.", response.status);
 
 	const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
 	let buffer = "";

@@ -6,6 +6,7 @@ from errors import UpstreamError
 from schemas.projects import PROJECT_LEVELS
 
 _JSON_OBJECT = re.compile(r"\{.*\}", re.DOTALL)
+_JSON_ARRAY = re.compile(r"\[.*\]", re.DOTALL)
 
 
 def coerce_str_list(value: Any) -> list[str]:
@@ -34,3 +35,17 @@ def parse_json_object(text: str) -> dict[str, Any]:
     if not isinstance(data, dict):
         raise UpstreamError("The AI response was not a JSON object.")
     return cast(dict[str, Any], data)
+
+
+def parse_json_array(text: str) -> list[Any]:
+    """Extract and parse the first JSON array from model output."""
+    match = _JSON_ARRAY.search(text)
+    if not match:
+        raise UpstreamError("The AI response did not contain a valid JSON array.")
+    try:
+        data: Any = json.loads(match.group(0))
+    except json.JSONDecodeError as exc:
+        raise UpstreamError("The AI response contained malformed JSON.") from exc
+    if not isinstance(data, list):
+        raise UpstreamError("The AI response was not a JSON array.")
+    return cast(list[Any], data)

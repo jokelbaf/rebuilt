@@ -8,6 +8,11 @@ export interface BackupSummary {
 	gitSources: number;
 	chats: number;
 	chatMessages: number;
+	platformAccounts: number;
+	searchQueries: number;
+	discoveryRuns: number;
+	discoveryEvents: number;
+	discoveredVacancies: number;
 	files: number;
 }
 

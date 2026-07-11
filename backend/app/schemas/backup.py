@@ -13,4 +13,9 @@ class BackupSummary(CamelModel):
     git_sources: int = 0
     chats: int = 0
     chat_messages: int = 0
+    platform_accounts: int = 0
+    search_queries: int = 0
+    discovery_runs: int = 0
+    discovery_events: int = 0
+    discovered_vacancies: int = 0
     files: int = 0

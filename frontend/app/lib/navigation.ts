@@ -1,4 +1,5 @@
 import {
+	Activity,
 	Briefcase,
 	FileText,
 	Files,
@@ -7,6 +8,8 @@ import {
 	Mail,
 	Mails,
 	Megaphone,
+	Radar,
+	SlidersHorizontal,
 	Sparkles,
 	User,
 	type LucideIcon,
@@ -36,6 +39,14 @@ export const navGroups: NavGroup[] = [
 		items: [{ title: "AI Chat", url: "/chat", icon: Sparkles }],
 	},
 	{
+		label: "Discovery",
+		items: [
+			{ title: "Found vacancies", url: "/discovery", icon: Radar },
+			{ title: "Activity", url: "/discovery/activity", icon: Activity },
+			{ title: "Search settings", url: "/discovery/settings", icon: SlidersHorizontal },
+		],
+	},
+	{
 		label: "Library",
 		items: [
 			{ title: "Resumes", url: "/resumes", icon: Files },
@@ -55,5 +66,8 @@ export const navGroups: NavGroup[] = [
 ];
 
 export function isNavItemActive(pathname: string, url: string): boolean {
+	if (url === "/discovery") {
+		return pathname === url || pathname.startsWith("/discovery/vacancies/");
+	}
 	return pathname === url || pathname.startsWith(`${url}/`);
 }
