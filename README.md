@@ -7,7 +7,6 @@ ReBuilt is a local-first desktop workspace for finding relevant roles and creati
 applications. It combines authenticated vacancy discovery, AI-assisted fit scoring, reusable
 career context, and document generation in one private workflow.
 
-<a id="overview"></a>
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://gita.jokelbaf.dev/api/widget/public/rebuilt-readme-section?w=880&amp;theme=dark&amp;label=Overview&amp;kicker=Product%20loop" />
   <img alt="Overview" src="https://gita.jokelbaf.dev/api/widget/public/rebuilt-readme-section?w=880&amp;theme=light&amp;label=Overview&amp;kicker=Product%20loop" width="880" />
@@ -18,7 +17,6 @@ career context, and document generation in one private workflow.
   <img alt="Discover, decide, and create with ReBuilt" src="https://gita.jokelbaf.dev/api/widget/public/rebuilt-readme-workflow?w=880&amp;theme=light" width="880" />
 </picture>
 
-<a id="stack"></a>
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://gita.jokelbaf.dev/api/widget/public/rebuilt-readme-section?w=880&amp;theme=dark&amp;label=Stack&amp;kicker=Core%20technologies" />
   <img alt="Stack" src="https://gita.jokelbaf.dev/api/widget/public/rebuilt-readme-section?w=880&amp;theme=light&amp;label=Stack&amp;kicker=Core%20technologies" width="880" />
@@ -32,7 +30,6 @@ career context, and document generation in one private workflow.
 | Tooling | `uv`, `pnpm`, Ruff, Pyright, ESLint, Prettier, Clippy, rustfmt |
 | AI | Claude Code and Codex CLIs behind a unified provider interface |
 
-<a id="architecture"></a>
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://gita.jokelbaf.dev/api/widget/public/rebuilt-readme-section?w=880&amp;theme=dark&amp;label=Architecture&amp;kicker=Repository%20map" />
   <img alt="Architecture" src="https://gita.jokelbaf.dev/api/widget/public/rebuilt-readme-section?w=880&amp;theme=light&amp;label=Architecture&amp;kicker=Repository%20map" width="880" />
@@ -55,7 +52,6 @@ shell/                      Tauri v2 host that manages the compiled backend side
 The root is a pnpm workspace for frontend and desktop orchestration. `backend/` remains an
 independent uv workspace, while `shell/` is a standalone Rust crate.
 
-<a id="data-and-ai"></a>
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://gita.jokelbaf.dev/api/widget/public/rebuilt-readme-section?w=880&amp;theme=dark&amp;label=Data%20%26%20AI&amp;kicker=Local-first" />
   <img alt="Data and AI" src="https://gita.jokelbaf.dev/api/widget/public/rebuilt-readme-section?w=880&amp;theme=light&amp;label=Data%20%26%20AI&amp;kicker=Local-first" width="880" />
@@ -75,7 +71,6 @@ its authentication and sessions; ReBuilt supplies structured career context with
 application database into a hosted service. Versioned database migrations and `.rebuilt` backups
 preserve existing data across upgrades.
 
-<a id="development"></a>
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://gita.jokelbaf.dev/api/widget/public/rebuilt-readme-section?w=880&amp;theme=dark&amp;label=Development&amp;kicker=Local%20workflow" />
   <img alt="Development" src="https://gita.jokelbaf.dev/api/widget/public/rebuilt-readme-section?w=880&amp;theme=light&amp;label=Development&amp;kicker=Local%20workflow" width="880" />
@@ -105,7 +100,6 @@ cd frontend && pnpm format:check && pnpm lint && pnpm typecheck
 cd shell && cargo fmt --all -- --check && cargo clippy --all-targets --all-features -- -D warnings
 ```
 
-<a id="production"></a>
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://gita.jokelbaf.dev/api/widget/public/rebuilt-readme-section?w=880&amp;theme=dark&amp;label=Production&amp;kicker=Web%20deployment" />
   <img alt="Production" src="https://gita.jokelbaf.dev/api/widget/public/rebuilt-readme-section?w=880&amp;theme=light&amp;label=Production&amp;kicker=Web%20deployment" width="880" />
@@ -122,7 +116,6 @@ cd ../backend && PRODUCTION=yes uv run python app/app.py
 Compiled builds enable production mode automatically, so packaged applications do not need a
 `PRODUCTION` environment variable.
 
-<a id="desktop-packaging"></a>
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://gita.jokelbaf.dev/api/widget/public/rebuilt-readme-section?w=880&amp;theme=dark&amp;label=Desktop%20packaging&amp;kicker=Tauri%20%2B%20Nuitka" />
   <img alt="Desktop packaging" src="https://gita.jokelbaf.dev/api/widget/public/rebuilt-readme-section?w=880&amp;theme=light&amp;label=Desktop%20packaging&amp;kicker=Tauri%20%2B%20Nuitka" width="880" />
@@ -150,7 +143,6 @@ At runtime the Rust shell chooses a free local port, starts the backend, waits f
 and navigates the window to the bundled application. It also terminates the sidecar process tree
 when the window exits.
 
-<a id="license"></a>
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://gita.jokelbaf.dev/api/widget/public/rebuilt-readme-section?w=880&amp;theme=dark&amp;label=License&amp;kicker=GPL-3.0" />
   <img alt="License" src="https://gita.jokelbaf.dev/api/widget/public/rebuilt-readme-section?w=880&amp;theme=light&amp;label=License&amp;kicker=GPL-3.0" width="880" />
