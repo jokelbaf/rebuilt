@@ -40,6 +40,13 @@ jobs:
         with:
           components: clippy
 
+      - name: Create sidecar placeholder
+        working-directory: shell
+        run: |
+          target="$(rustc -Vv | sed -n 's/^host: //p')"
+          mkdir -p binaries
+          touch "binaries/rebuilt-server-${target}"
+
       - name: Run clippy (auto-fix)
         working-directory: shell
         run: cargo clippy --fix --locked --allow-dirty --all-targets --all-features -- -D warnings
