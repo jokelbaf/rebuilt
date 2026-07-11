@@ -12,6 +12,7 @@ from typing import Any, cast
 from constants import DATA_DIR
 from errors import BadRequestError
 from loguru import logger
+from migrations import LATEST_SCHEMA_REVISION
 from models import (
     AppSetting,
     Chat,
@@ -35,6 +36,8 @@ from pydantic import ValidationError
 from schemas.backup import BackupSummary
 from sqlalchemy import delete
 from sqlmodel import SQLModel, select
+
+from .backup_migrations import upgrade_backup
 
 MAGIC = b"REBUILT\x01"
 FORMAT_VERSION = 1
@@ -86,12 +89,13 @@ async def create_backup() -> bytes:
 async def restore_backup(data: bytes) -> BackupSummary:
     """Replace all stored data with the contents of a .rebuilt archive."""
     payload = await _decode_archive(data)
-    tables, files = _parse_sections(payload)
+    manifest, tables, files = _parse_sections(payload)
+    tables = upgrade_backup(tables, _schema_revision(manifest))
     rows = {name: _coerce_rows(model, tables.get(name, [])) for name, model in _TABLES.items()}
     _ensure_safe_paths(files)
 
     async with make_session() as session:
-        for model in _TABLES.values():
+        for model in reversed(_TABLES.values()):
             await session.exec(delete(model))  # pyright: ignore[reportDeprecated, reportCallIssue, reportArgumentType]
         for instances in rows.values():
             session.add_all(instances)
@@ -105,7 +109,7 @@ async def restore_backup(data: bytes) -> BackupSummary:
 async def erase_all_data() -> None:
     """Delete every stored database row and all data files."""
     async with make_session() as session:
-        for model in _TABLES.values():
+        for model in reversed(_TABLES.values()):
             await session.exec(delete(model))  # pyright: ignore[reportDeprecated, reportCallIssue, reportArgumentType]
         await session.commit()
     for root in _FILE_ROOTS + _TEMP_ROOTS:
@@ -127,6 +131,7 @@ def _build_manifest(tables: dict[str, list[dict[str, Any]]]) -> dict[str, Any]:
     """Build the manifest section describing the backup."""
     return {
         "formatVersion": FORMAT_VERSION,
+        "schemaRevision": LATEST_SCHEMA_REVISION,
         "createdAt": datetime.datetime.now(datetime.UTC).isoformat(),
         "counts": {name: len(rows) for name, rows in tables.items()},
     }
@@ -169,8 +174,11 @@ async def _decode_archive(data: bytes) -> bytes:
         raise BadRequestError("The backup file is corrupted.") from exc
 
 
-def _parse_sections(payload: bytes) -> tuple[dict[str, Any], list[tuple[str, bytes]]]:
+def _parse_sections(
+    payload: bytes,
+) -> tuple[dict[str, Any], dict[str, Any], list[tuple[str, bytes]]]:
     """Split the decompressed payload into database rows and file entries."""
+    manifest: dict[str, Any] | None = None
     tables: dict[str, Any] | None = None
     files: list[tuple[str, bytes]] = []
     offset = 0
@@ -184,25 +192,42 @@ def _parse_sections(payload: bytes) -> tuple[dict[str, Any], list[tuple[str, byt
         body = payload[offset : offset + length]
         offset += length
 
-        if section_id == _SECTION_DATABASE:
+        if section_id == _SECTION_MANIFEST:
+            manifest = _parse_json_object(body, "manifest")
+        elif section_id == _SECTION_DATABASE:
             tables = _parse_database(body)
         elif section_id == _SECTION_FILE:
             files.append(_parse_file(body))
 
+    if manifest is None:
+        raise BadRequestError("The backup file contains no manifest section.")
     if tables is None:
         raise BadRequestError("The backup file contains no database section.")
-    return tables, files
+    return manifest, tables, files
 
 
 def _parse_database(body: bytes) -> dict[str, Any]:
     """Parse and shape-check the database section."""
+    return _parse_json_object(body, "database")
+
+
+def _parse_json_object(body: bytes, section: str) -> dict[str, Any]:
+    """Parse one JSON object section from an archive."""
     try:
         data: Any = json.loads(body)
     except (json.JSONDecodeError, UnicodeDecodeError) as exc:
-        raise BadRequestError("The backup database section is corrupted.") from exc
+        raise BadRequestError(f"The backup {section} section is corrupted.") from exc
     if not isinstance(data, dict):
-        raise BadRequestError("The backup database section is corrupted.")
+        raise BadRequestError(f"The backup {section} section is corrupted.")
     return cast(dict[str, Any], data)
+
+
+def _schema_revision(manifest: dict[str, Any]) -> int:
+    """Read the schema revision, treating legacy manifests as revision zero."""
+    revision = manifest.get("schemaRevision", 0)
+    if not isinstance(revision, int) or isinstance(revision, bool):
+        raise BadRequestError("The backup manifest contains an invalid schema revision.")
+    return revision
 
 
 def _parse_file(body: bytes) -> tuple[str, bytes]:
