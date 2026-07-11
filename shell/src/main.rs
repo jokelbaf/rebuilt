@@ -8,8 +8,8 @@ use std::thread;
 use std::time::Duration;
 
 use tauri::{Manager, RunEvent, Url};
-use tauri_plugin_shell::process::{CommandChild, CommandEvent};
 use tauri_plugin_shell::ShellExt;
+use tauri_plugin_shell::process::{CommandChild, CommandEvent};
 
 struct BackendProcess(Mutex<Option<CommandChild>>);
 
@@ -114,10 +114,10 @@ fn main() {
         .build(tauri::generate_context!())
         .expect("error while building the tauri application")
         .run(|app, event| {
-            if let RunEvent::ExitRequested { .. } = event {
-                if let Some(child) = app.state::<BackendProcess>().0.lock().unwrap().take() {
-                    kill_backend(child);
-                }
+            if let RunEvent::ExitRequested { .. } = event
+                && let Some(child) = app.state::<BackendProcess>().0.lock().unwrap().take()
+            {
+                kill_backend(child);
             }
         });
 }
