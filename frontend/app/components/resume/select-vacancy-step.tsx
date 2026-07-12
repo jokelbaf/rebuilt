@@ -10,9 +10,11 @@ import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { useDebouncedValue } from "~/hooks/use-debounced-value";
 import { useVacancies } from "~/lib/api/vacancies";
+import { truncateText } from "~/lib/format";
 import { listItem } from "~/lib/motion";
 
 const MAX_RESULTS = 6;
+const DESCRIPTION_PREVIEW_LENGTH = 160;
 
 interface SelectVacancyStepProps {
 	value?: string;
@@ -53,19 +55,19 @@ export function SelectVacancyStep({ value, onChange }: SelectVacancyStepProps) {
 			}
 		>
 			{shown.map((vacancy) => (
-				<motion.div key={vacancy.id} variants={listItem}>
+				<motion.div key={vacancy.id} variants={listItem} className="h-full">
 					<SelectableCard
 						selected={value === vacancy.id}
 						onSelect={() => onChange(vacancy.id)}
-						className="w-full"
+						className="h-full w-full"
 					>
 						<div className="space-y-2 pr-6">
 							<p className="leading-snug font-medium">{vacancy.title}</p>
 							<Badge variant="secondary" className="uppercase">
 								{vacancy.language}
 							</Badge>
-							<p className="text-muted-foreground line-clamp-2 text-xs">
-								{vacancy.description}
+							<p className="text-muted-foreground h-8 overflow-hidden text-xs leading-4">
+								{truncateText(vacancy.description, DESCRIPTION_PREVIEW_LENGTH)}
 							</p>
 						</div>
 					</SelectableCard>
