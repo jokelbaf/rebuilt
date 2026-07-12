@@ -84,12 +84,18 @@ cp .env.example .env
 uv run python app/app.py
 ```
 
-Start the frontend at `http://localhost:5173`; Vite proxies `/api` to the backend:
+Start the frontend at `http://localhost:1420`; Vite proxies `/api` to the backend:
 
 ```bash
 cd frontend
 pnpm install
 pnpm dev
+```
+
+With both development servers running, start the Tauri shell from the repository root:
+
+```bash
+pnpm tauri dev
 ```
 
 Run the local quality gates before submitting a change:
