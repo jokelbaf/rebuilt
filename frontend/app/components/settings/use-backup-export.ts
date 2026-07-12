@@ -3,10 +3,9 @@ import { toast } from "sonner";
 
 import { downloadBackup } from "~/lib/api/backup";
 import { getErrorMessage } from "~/lib/api/errors";
-import { triggerDownload } from "~/lib/download";
+import { saveDownload } from "~/lib/download";
 
 const FINISH_DELAY = 600;
-const REVOKE_DELAY = 10_000;
 
 export function useBackupExport() {
 	const [isExporting, setIsExporting] = useState(false);
@@ -33,10 +32,7 @@ export function useBackupExport() {
 			});
 			if (mountedRef.current) setProgress(100);
 
-			const url = URL.createObjectURL(blob);
-			triggerDownload(url, fileName);
-			setTimeout(() => URL.revokeObjectURL(url), REVOKE_DELAY);
-			toast.success("Backup downloaded");
+			saveDownload(blob, fileName);
 		} catch (error) {
 			toast.error(getErrorMessage(error));
 		} finally {

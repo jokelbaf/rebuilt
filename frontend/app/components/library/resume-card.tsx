@@ -4,7 +4,7 @@ import { toast } from "sonner";
 
 import { useDeleteLibraryResume, useLibraryResume } from "~/lib/api/library";
 import type { ResumeListItem } from "~/lib/api/types/library";
-import { triggerDownload } from "~/lib/download";
+import { downloadFile } from "~/lib/download";
 import { formatRelativeDate, prettifyName } from "~/lib/format";
 
 import { DocumentCard } from "./document-card";
@@ -22,7 +22,7 @@ export function ResumeCard({ resume }: ResumeCardProps) {
 	const title = resume.vacancyTitle || prettifyName(resume.name) || "Resume";
 
 	function download() {
-		triggerDownload(`/api/resume/download/${resume.id}`, `${resume.name || "resume"}.pdf`);
+		void downloadFile(`/api/resume/download/${resume.id}`, `${resume.name || "resume"}.pdf`);
 	}
 
 	function remove() {

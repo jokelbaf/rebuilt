@@ -4,7 +4,7 @@ import { toast } from "sonner";
 
 import { useDeleteLibraryCoverLetter, useLibraryCoverLetter } from "~/lib/api/library";
 import type { CoverLetterListItem } from "~/lib/api/types/library";
-import { triggerDownload } from "~/lib/download";
+import { downloadFile } from "~/lib/download";
 import { formatRelativeDate, prettifyName } from "~/lib/format";
 
 import { DocumentCard } from "./document-card";
@@ -22,7 +22,7 @@ export function CoverLetterCard({ coverLetter }: CoverLetterCardProps) {
 	const title = coverLetter.vacancyTitle || prettifyName(coverLetter.name) || "Cover letter";
 
 	function download() {
-		triggerDownload(
+		void downloadFile(
 			`/api/cover-letter/download/${coverLetter.id}`,
 			`${coverLetter.name || "cover-letter"}.pdf`
 		);

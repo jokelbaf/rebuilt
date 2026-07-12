@@ -8,7 +8,7 @@ import {
 } from "~/lib/api/cover-letter";
 import { useResumes } from "~/lib/api/resume";
 import type { ExportPdfResult, GeneratedDocument } from "~/lib/api/types/resume";
-import { triggerDownload } from "~/lib/download";
+import { downloadFile } from "~/lib/download";
 import { slugify } from "~/lib/format";
 
 export function useCoverLetterBuilder() {
@@ -53,7 +53,7 @@ export function useCoverLetterBuilder() {
 			{
 				onSuccess: () => {
 					toast.success("Cover letter saved");
-					triggerDownload(exportResult.downloadUrl, exportResult.fileName);
+					void downloadFile(exportResult.downloadUrl, exportResult.fileName);
 				},
 			}
 		);

@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { useExportResumePdf, useGenerateResume, useSaveResume } from "~/lib/api/resume";
 import type { ExportPdfResult, GeneratedDocument } from "~/lib/api/types/resume";
 import { useVacancies } from "~/lib/api/vacancies";
-import { triggerDownload } from "~/lib/download";
+import { downloadFile } from "~/lib/download";
 import { slugify } from "~/lib/format";
 
 export function useResumeBuilder() {
@@ -56,7 +56,7 @@ export function useResumeBuilder() {
 			{
 				onSuccess: () => {
 					toast.success("Resume saved");
-					triggerDownload(exportResult.downloadUrl, exportResult.fileName);
+					void downloadFile(exportResult.downloadUrl, exportResult.fileName);
 				},
 			}
 		);
