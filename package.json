@@ -1,7 +1,7 @@
 {
   "name": "rebuilt",
   "private": true,
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "ReBuilt - AI resume builder (workspace root)",
   "scripts": {
     "backend": "uv run --project backend python backend/build.py --sidecar",

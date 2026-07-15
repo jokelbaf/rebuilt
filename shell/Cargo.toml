@@ -1,6 +1,6 @@
 [package]
 name = "rebuilt"
-version = "0.4.0"
+version = "0.5.0"
 description = "ReBuilt - AI resume builder"
 authors = ["Nekolab"]
 edition = "2024"
