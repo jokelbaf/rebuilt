@@ -4,6 +4,12 @@ import uuid
 from schemas import CamelModel
 
 
+class DocumentHtmlUpdate(CamelModel):
+    """Payload used to replace a saved document's HTML."""
+
+    html: str
+
+
 class ResumeListItem(CamelModel):
     """A saved resume as shown in the created-documents library."""
 

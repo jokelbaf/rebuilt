@@ -1,4 +1,4 @@
-import { Download, Eye, type LucideIcon } from "lucide-react";
+import { Download, Eye, Pencil, type LucideIcon } from "lucide-react";
 import { motion } from "motion/react";
 
 import { ConfirmDelete } from "~/components/common/confirm-delete";
@@ -20,6 +20,7 @@ interface DocumentCardProps {
 	badge?: string;
 	meta: string;
 	onPreview: () => void;
+	onEdit: () => void;
 	onDownload: () => void;
 	onDelete: () => void;
 	deleteTitle: string;
@@ -32,6 +33,7 @@ export function DocumentCard({
 	badge,
 	meta,
 	onPreview,
+	onEdit,
 	onDownload,
 	onDelete,
 	deleteTitle,
@@ -64,6 +66,10 @@ export function DocumentCard({
 					<Button variant="outline" size="sm" className="flex-1" onClick={onPreview}>
 						<Eye className="size-4" />
 						Preview
+					</Button>
+					<Button variant="outline" size="sm" className="flex-1" onClick={onEdit}>
+						<Pencil className="size-4" />
+						Edit
 					</Button>
 					<Button
 						variant="outline"

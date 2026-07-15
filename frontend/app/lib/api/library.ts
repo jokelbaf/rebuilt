@@ -7,15 +7,20 @@ import type {
 	CoverLetterListItem,
 	ResumeDocument,
 	ResumeListItem,
+	UpdateLibraryDocumentInput,
 } from "./types/library";
 
 const libraryApi = {
 	listResumes: () => apiClient.get<ResumeListItem[]>("/library/resumes"),
 	getResume: (id: string) => apiClient.get<ResumeDocument>(`/library/resumes/${id}`),
+	updateResume: ({ id, html }: UpdateLibraryDocumentInput) =>
+		apiClient.patch<ResumeDocument>(`/library/resumes/${id}`, { html }),
 	removeResume: (id: string) => apiClient.delete<void>(`/library/resumes/${id}`),
 	listCoverLetters: () => apiClient.get<CoverLetterListItem[]>("/library/cover-letters"),
 	getCoverLetter: (id: string) =>
 		apiClient.get<CoverLetterDocument>(`/library/cover-letters/${id}`),
+	updateCoverLetter: ({ id, html }: UpdateLibraryDocumentInput) =>
+		apiClient.patch<CoverLetterDocument>(`/library/cover-letters/${id}`, { html }),
 	removeCoverLetter: (id: string) => apiClient.delete<void>(`/library/cover-letters/${id}`),
 };
 
@@ -36,6 +41,18 @@ export function useDeleteLibraryResume() {
 	return useMutation({
 		mutationFn: libraryApi.removeResume,
 		onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.library.resumes }),
+	});
+}
+
+export function useUpdateLibraryResume() {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: libraryApi.updateResume,
+		onSuccess: (resume) => {
+			queryClient.setQueryData(queryKeys.library.resume(resume.id), resume);
+			void queryClient.invalidateQueries({ queryKey: queryKeys.library.resumes });
+			void queryClient.invalidateQueries({ queryKey: queryKeys.resumes.all });
+		},
 	});
 }
 
@@ -60,5 +77,16 @@ export function useDeleteLibraryCoverLetter() {
 		mutationFn: libraryApi.removeCoverLetter,
 		onSuccess: () =>
 			queryClient.invalidateQueries({ queryKey: queryKeys.library.coverLetters }),
+	});
+}
+
+export function useUpdateLibraryCoverLetter() {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: libraryApi.updateCoverLetter,
+		onSuccess: (coverLetter) => {
+			queryClient.setQueryData(queryKeys.library.coverLetter(coverLetter.id), coverLetter);
+			void queryClient.invalidateQueries({ queryKey: queryKeys.library.coverLetters });
+		},
 	});
 }

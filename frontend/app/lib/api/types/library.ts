@@ -22,3 +22,8 @@ export interface CoverLetterListItem {
 export interface CoverLetterDocument extends CoverLetterListItem {
 	html: string;
 }
+
+export interface UpdateLibraryDocumentInput {
+	id: string;
+	html: string;
+}

@@ -4,6 +4,7 @@ from errors import NotFoundError
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 from responses import ok
+from schemas.library import DocumentHtmlUpdate
 from services import library
 
 router = APIRouter(prefix="/api/library", tags=["Library"])
@@ -19,6 +20,15 @@ async def list_resumes() -> JSONResponse:
 async def get_resume(resume_id: uuid.UUID) -> JSONResponse:
     """Get a saved resume with its rendered HTML."""
     resume = await library.get_resume(resume_id)
+    if not resume:
+        raise NotFoundError("Resume not found.")
+    return ok(resume)
+
+
+@router.patch("/resumes/{resume_id}")
+async def update_resume(resume_id: uuid.UUID, payload: DocumentHtmlUpdate) -> JSONResponse:
+    """Update a saved resume's HTML and exported PDF."""
+    resume = await library.update_resume_html(resume_id, payload.html)
     if not resume:
         raise NotFoundError("Resume not found.")
     return ok(resume)
@@ -42,6 +52,17 @@ async def list_cover_letters() -> JSONResponse:
 async def get_cover_letter(cover_letter_id: uuid.UUID) -> JSONResponse:
     """Get a saved cover letter with its rendered HTML."""
     cover_letter = await library.get_cover_letter(cover_letter_id)
+    if not cover_letter:
+        raise NotFoundError("Cover letter not found.")
+    return ok(cover_letter)
+
+
+@router.patch("/cover-letters/{cover_letter_id}")
+async def update_cover_letter(
+    cover_letter_id: uuid.UUID, payload: DocumentHtmlUpdate
+) -> JSONResponse:
+    """Update a saved cover letter's HTML and exported PDF."""
+    cover_letter = await library.update_cover_letter_html(cover_letter_id, payload.html)
     if not cover_letter:
         raise NotFoundError("Cover letter not found.")
     return ok(cover_letter)
