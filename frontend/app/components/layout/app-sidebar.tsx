@@ -1,4 +1,4 @@
-import { Settings } from "lucide-react";
+import { Gauge, Settings } from "lucide-react";
 import { Link, useLocation } from "react-router";
 
 import { ThemeMenuButton } from "~/components/layout/theme-menu-button";
@@ -20,7 +20,12 @@ import {
 import { useDiscoveredVacancyCount } from "~/lib/api/discovery";
 import { isNavItemActive, navGroups } from "~/lib/navigation";
 
-export function AppSidebar({ onOpenSettings }: { onOpenSettings: () => void }) {
+interface AppSidebarProps {
+	onOpenSettings: () => void;
+	onOpenUsage: () => void;
+}
+
+export function AppSidebar({ onOpenSettings, onOpenUsage }: AppSidebarProps) {
 	const { pathname } = useLocation();
 	const { isMobile, setOpenMobile } = useSidebar();
 	const { data: newVacancyCount } = useDiscoveredVacancyCount();
@@ -86,6 +91,18 @@ export function AppSidebar({ onOpenSettings }: { onOpenSettings: () => void }) {
 				<SidebarMenu>
 					<SidebarMenuItem>
 						<ThemeMenuButton />
+					</SidebarMenuItem>
+					<SidebarMenuItem>
+						<SidebarMenuButton
+							onClick={() => {
+								closeMobileSidebar();
+								onOpenUsage();
+							}}
+							tooltip="Usage"
+						>
+							<Gauge />
+							<span>Usage</span>
+						</SidebarMenuButton>
 					</SidebarMenuItem>
 					<SidebarMenuItem>
 						<SidebarMenuButton

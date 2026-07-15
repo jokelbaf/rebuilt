@@ -10,7 +10,16 @@ from errors import UpstreamError
 from loguru import logger
 
 from .base import AiProvider
-from .events import AiModelInfo, ChatDelta, ChatDone, ChatEvent, ChatSessionStart, ChatToolUse
+from .claude_usage import read_claude_usage
+from .events import (
+    AiModelInfo,
+    AiUsageSnapshot,
+    ChatDelta,
+    ChatDone,
+    ChatEvent,
+    ChatSessionStart,
+    ChatToolUse,
+)
 
 _STREAM_LINE_LIMIT = 2**23
 _MCP_SERVER = "rebuilt"
@@ -214,6 +223,10 @@ class ClaudeCodeProvider(AiProvider):
         known = {info.id for info in models}
         models += [info for info in self._extra_models() if info.id not in known]
         return models
+
+    async def usage(self) -> AiUsageSnapshot:
+        """Return Claude Code account usage from its status-line data."""
+        return await read_claude_usage(self._executable)
 
     def fast_model(self) -> str:
         """Return the Claude model preferred for lightweight tasks."""

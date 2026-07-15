@@ -2,7 +2,7 @@ import abc
 import pathlib
 from collections.abc import AsyncIterator
 
-from .events import AiModelInfo, ChatEvent
+from .events import AiModelInfo, AiUsageSnapshot, ChatEvent
 
 
 class AiProvider(abc.ABC):
@@ -50,6 +50,10 @@ class AiProvider(abc.ABC):
     @abc.abstractmethod
     def models(self) -> list[AiModelInfo]:
         """Return the models this provider offers for chatting."""
+
+    @abc.abstractmethod
+    async def usage(self) -> AiUsageSnapshot:
+        """Return current account usage windows for this provider."""
 
     def efforts(self, model: str | None = None) -> list[str]:
         """Return the effort levels supported by a model, if any."""

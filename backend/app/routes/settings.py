@@ -17,3 +17,15 @@ async def get_ai_settings() -> JSONResponse:
 async def update_ai_settings(payload: AiSettingsUpdate) -> JSONResponse:
     """Persist and activate the selected AI provider."""
     return ok(await settings_service.update_ai_provider(payload.provider))
+
+
+@router.get("/ai/usage")
+async def get_ai_usage() -> JSONResponse:
+    """Return rate-limit usage for the selected AI provider."""
+    return ok(await settings_service.get_ai_usage())
+
+
+@router.get("/about")
+async def get_about() -> JSONResponse:
+    """Return application identity and version information."""
+    return ok(settings_service.get_about())

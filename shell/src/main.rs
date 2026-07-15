@@ -89,12 +89,14 @@ fn main() {
 
             #[cfg(not(debug_assertions))]
             {
+                let version = app.package_info().version.to_string();
                 let (mut rx, child) = app
                     .shell()
                     .sidecar("rebuilt-server")
                     .expect("failed to create the backend sidecar command")
                     .env("HOST", "127.0.0.1")
                     .env("PORT", port.to_string())
+                    .env("REBUILT_VERSION", version)
                     .spawn()
                     .expect("failed to spawn the backend sidecar");
 

@@ -4,6 +4,8 @@ from crud import cover_letters as cover_letters_crud
 from crud import resumes as resumes_crud
 from crud import vacancies as vacancies_crud
 from models import CoverLetter, Resume
+from models.base import utcnow
+from pdf import render_pdf
 from schemas.library import (
     CoverLetterDetail,
     CoverLetterListItem,
@@ -52,6 +54,18 @@ async def get_resume(resume_id: uuid.UUID) -> ResumeDetail | None:
         updated_at=resume.updated_at,
         html=resume.html,
     )
+
+
+async def update_resume_html(resume_id: uuid.UUID, html: str) -> ResumeDetail | None:
+    """Replace a saved resume's HTML and regenerate its PDF."""
+    resume = await resumes_crud.get(resume_id)
+    if not resume or not resume.is_saved:
+        return None
+    await render_pdf(html, export_path("resume", resume.id))
+    resume.html = html
+    resume.updated_at = utcnow()
+    await resumes_crud.save(resume)
+    return await get_resume(resume_id)
 
 
 async def delete_resume(resume_id: uuid.UUID) -> bool:
@@ -109,6 +123,20 @@ async def get_cover_letter(cover_letter_id: uuid.UUID) -> CoverLetterDetail | No
         updated_at=cover_letter.updated_at,
         html=cover_letter.html,
     )
+
+
+async def update_cover_letter_html(
+    cover_letter_id: uuid.UUID, html: str
+) -> CoverLetterDetail | None:
+    """Replace a saved cover letter's HTML and regenerate its PDF."""
+    cover_letter = await cover_letters_crud.get(cover_letter_id)
+    if not cover_letter or not cover_letter.is_saved:
+        return None
+    await render_pdf(html, export_path("cover-letter", cover_letter.id))
+    cover_letter.html = html
+    cover_letter.updated_at = utcnow()
+    await cover_letters_crud.save(cover_letter)
+    return await get_cover_letter(cover_letter_id)
 
 
 async def delete_cover_letter(cover_letter_id: uuid.UUID) -> bool:

@@ -1,6 +1,7 @@
 """Compile the backend (and bundled frontend) into a single-file executable with Nuitka."""
 
 import argparse
+import json
 import os
 import shutil
 import subprocess
@@ -14,13 +15,22 @@ FRONTEND_BUILD = FRONTEND_DIR / "build" / "client"
 STATIC_DIR = BACKEND_DIR / "static"
 OUTPUT_DIR = BACKEND_DIR / "dist"
 ASSETS_DIR = BACKEND_DIR / "assets"
-SIDECAR_DIR = ROOT_DIR / "shell" / "binaries"
+SHELL_DIR = ROOT_DIR / "shell"
+SIDECAR_DIR = SHELL_DIR / "binaries"
 
 APP_NAME = "ReBuilt"
 SIDECAR_NAME = "rebuilt-server"
-VERSION = "0.4.0"
 IS_WINDOWS = sys.platform == "win32"
 IS_MACOS = sys.platform == "darwin"
+
+
+def application_version() -> str:
+    """Return the product version configured for the Tauri application."""
+    config: dict[str, str] = json.loads((SHELL_DIR / "tauri.conf.json").read_text(encoding="utf-8"))
+    return config.get("version", "unknown")
+
+
+VERSION = application_version()
 
 
 def log(message: str) -> None:
@@ -89,7 +99,7 @@ def build_binary() -> Path:
         *icon_option(),
     ]
     if IS_WINDOWS:
-        command.append("--windows-console-mode=disable")
+        command += ["--include-package=winpty", "--windows-console-mode=disable"]
     command.append("app/app.py")
 
     # Nuitka needs a non-buggy patchelf on Linux; the one shipped in the venv works.

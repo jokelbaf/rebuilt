@@ -2,6 +2,7 @@ import { XIcon } from "lucide-react";
 import { useState } from "react";
 
 import { AiBackendSection } from "~/components/settings/sections/ai-backend-section";
+import { AboutSection } from "~/components/settings/sections/about-section";
 import { BackupsSection } from "~/components/settings/sections/backups-section";
 import { DangerSection } from "~/components/settings/sections/danger-section";
 import { GitSourcesSection } from "~/components/settings/sections/git-sources-section";
@@ -32,6 +33,7 @@ const sectionContent: Record<SettingsSectionId, React.ReactNode> = {
 	"ai-backend": <AiBackendSection />,
 	"git-sources": <GitSourcesSection />,
 	backups: <BackupsSection />,
+	about: <AboutSection />,
 	danger: <DangerSection />,
 };
 

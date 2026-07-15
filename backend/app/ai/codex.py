@@ -8,9 +8,19 @@ from typing import Any, cast
 
 from errors import UpstreamError
 from loguru import logger
+from modules.version import get_application_version
 
 from .base import AiProvider
-from .events import AiModelInfo, ChatDelta, ChatDone, ChatEvent, ChatSessionStart, ChatToolUse
+from .codex_usage import read_codex_usage
+from .events import (
+    AiModelInfo,
+    AiUsageSnapshot,
+    ChatDelta,
+    ChatDone,
+    ChatEvent,
+    ChatSessionStart,
+    ChatToolUse,
+)
 
 _MCP_SERVER = "rebuilt"
 _MCP_TOOLS = (
@@ -169,6 +179,10 @@ class CodexProvider(AiProvider):
         if self._models_cache is None:
             self._models_cache = self._load_models()
         return list(self._models_cache)
+
+    async def usage(self) -> AiUsageSnapshot:
+        """Return Codex account usage from the local app server."""
+        return await read_codex_usage(self._executable, get_application_version())
 
     def fast_model(self) -> str | None:
         """Return the quickest visible Codex model from the local catalog."""

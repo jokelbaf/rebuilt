@@ -67,5 +67,7 @@ export const queryKeys = {
 	},
 	settings: {
 		ai: ["settings", "ai"] as const,
+		usage: ["settings", "ai", "usage"] as const,
+		about: ["settings", "about"] as const,
 	},
 } as const;
