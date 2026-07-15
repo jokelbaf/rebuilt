@@ -1,6 +1,6 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://gita.jokelbaf.dev/api/widget/public/rebuilt-readme-hero?w=880&amp;theme=dark&amp;v=2" />
-  <img alt="ReBuilt — turn the job search into a focused workflow" src="https://gita.jokelbaf.dev/api/widget/public/rebuilt-readme-hero?w=880&amp;theme=light&amp;v=2" width="880" />
+  <img alt="ReBuilt - turn the job search into a focused workflow" src="https://gita.jokelbaf.dev/api/widget/public/rebuilt-readme-hero?w=880&amp;theme=light&amp;v=2" width="880" />
 </picture>
 
 ReBuilt is a local-first desktop workspace for finding relevant roles and creating focused
